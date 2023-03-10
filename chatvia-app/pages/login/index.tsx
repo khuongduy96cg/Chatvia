@@ -3,16 +3,20 @@ import Image from 'next/image'
 import { signIn, useSession } from "next-auth/react";
 import { FieldValues, useForm, UseFormReturn } from "react-hook-form";
 import { useDispatch } from 'react-redux';
+import { useRouter } from 'next/router';
 
 import { Props, User } from '@/interfaces/auth';
 
-import { Button } from '@/components/button/Button';
-import styles from './Login.module.css';
-import loginImage from '@/public/login_image.png';
-import { useRouter } from 'next/router';
-import { NEXTAUTH_STATUS, NEXTAUTH_TYPE, ROUTES } from '@/types/constant';
 import { toastEmitter } from '@/redux/slices/toastSlice';
+
 import Layout from '@/components/layout';
+import { Button } from '@/components/button/Button';
+
+import { NEXTAUTH_STATUS, NEXTAUTH_TYPE, ROUTES } from '@/types/constant';
+
+//import loginImage from '@/public/login_image.gif';
+import loginImage from '@/public/the_hihi.gif';
+import styles from './Login.module.css';
 
 const Login = ({ csrfToken }: Props) => {
     const { status, data: session } = useSession();
@@ -38,7 +42,7 @@ const Login = ({ csrfToken }: Props) => {
     }
     else if (status === NEXTAUTH_STATUS.UNAUTHENTICATED) {
 
-        const handleError = (errors: any) => { };
+        const handleError = (errors: any) => { console.log('login-handle-errors========', errors) };
 
         const loginOptions = {
             // email: {
@@ -56,7 +60,7 @@ const Login = ({ csrfToken }: Props) => {
             },
         };
 
-        const handleLogin = async (data: FieldValues) => {
+        const handleSignin = async (data: FieldValues) => {
             try {
 
                 const { username, password } = data as User;
@@ -68,7 +72,6 @@ const Login = ({ csrfToken }: Props) => {
                 })
 
                 if (result?.ok && !result.error) {
-                    //toast.dismiss();
                     router.push(ROUTES.HOME);
                 }
                 else {
@@ -103,7 +106,7 @@ const Login = ({ csrfToken }: Props) => {
                     </section>
                     <section className={`${styles.form_wrapper} grid center`}>
                         <form action="" className={styles.form_section}
-                            onSubmit={handleSubmit(handleLogin, handleError)}>
+                            onSubmit={handleSubmit(handleSignin, handleError)}>
 
                             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
                             <div className={styles.header}>
@@ -111,16 +114,16 @@ const Login = ({ csrfToken }: Props) => {
                                 <p>Welcome back, Please enter your details</p>
                             </div>
                             <div className={styles.field}>
-                                <label htmlFor="email">Email</label>
-                                <input id="email" type="text" placeholder="Enter Your name"
-                                    {...register("username", loginOptions.username)} />
+                                <label htmlFor="username">Username</label>
+                                <input id="username" type="text" placeholder="Enter Your name"
+                                    {...register("username", loginOptions.username)} autoFocus />
 
                                 {errors?.username && (<p className={styles.validate_error}>{errors.username.message as React.ReactNode}</p>)}
                             </div>
                             <div className={styles.field}>
                                 <label htmlFor="password">Password</label>
                                 <input id="password" type="password" placeholder="Enter Your password"
-                                    {...register("password", loginOptions.password)} autoFocus />
+                                    {...register("password", loginOptions.password)} />
 
                                 {errors?.password && (<p className={styles.validate_error}>{errors.password.message as React.ReactNode}</p>)}
                             </div>
@@ -134,7 +137,7 @@ const Login = ({ csrfToken }: Props) => {
                             <Button type="submit"
                             //callbackfunc={handleButtonLoginClick}
                             >
-                                Log in
+                                Sign in
                             </Button>
                             <div className={`btn ${styles.google_sign_in} flex center`}
                                 onClick={signInGoogle}>
@@ -147,7 +150,7 @@ const Login = ({ csrfToken }: Props) => {
                                 Sign in with Google
                             </div>
                             <div className={styles.footer}>
-                                <p>Dont have an account? <a href="#0">Sign up</a></p>
+                                <p>Dont have an account? <a href={ROUTES.REGISTER}>Sign up</a></p>
                             </div>
                         </form>
                     </section>

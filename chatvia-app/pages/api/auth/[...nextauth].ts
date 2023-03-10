@@ -13,6 +13,7 @@ import UserModel from "@/models/user_model";
 import connectDB from "@/utils/mongoose";
 import clientPromise from "@/utils/mongodb";
 import { NEXTAUTH_TYPE, ROUTES } from "@/types/constant";
+import { User } from "@/interfaces/auth";
 
 const authOptions: NextAuthOptions = {
     //adapter: MongoDBAdapter(clientPromise),
@@ -34,16 +35,20 @@ const authOptions: NextAuthOptions = {
                 try {
                     await connectDB();
                     
-                    const user = await UserModel.findOne({ username: credentials?.username }) as any;
+                    const user = await UserModel.findOne({ username: credentials?.username }) as User;
 
                     //bcrypt.compareSync(credentials?.password as string, user.password)
                     if (user && credentials?.password === user.password) {
                         // Any object returned will be saved in `user` property of the JWT
                         console.log("user-----", user);
+                        //return user;
                         return {
                             id: JSON.stringify(user._id),
                             //name: user.name,
                             email: user.email,
+                            first_name: user.first_name,
+                            last_name: user.last_name,
+                            username: user.username
                             //isAdmin: user.isAdmin,
                         }
                     } else {
@@ -163,7 +168,7 @@ const authOptions: NextAuthOptions = {
         //signOut: '/auth/signout',
         //error: '/auth/error', // Error code passed in query string as ?error=
         //verifyRequest: '/auth/verify-request', // (used for check email message)
-        //newUser: '/auth/new-user' // New users will be directed here on first sign in (leave the property out if not of interest)
+        newUser: ROUTES.REGISTER // New users will be directed here on first sign in (leave the property out if not of interest)
     },
     events: {
         // async signIn(message) { /* on successful sign in */ },

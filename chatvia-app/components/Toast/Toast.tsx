@@ -9,6 +9,8 @@ import { toastEmitter } from '@/redux/slices/toastSlice'
 import { ToastState } from '@/interfaces/Itoast'
 
 const customId = 'toast-id'
+//toast.dismiss();
+const autoClose = 5000;
 
 function Toast() {
     const value = useSelector((state: RootState) => state.toast.value as ToastState)
@@ -27,6 +29,7 @@ function Toast() {
                 if (value.isError) {
                     toastFn.error(value.message, {
                         toastId: customId,
+                        autoClose: value.config?.autoClose || autoClose,
                         onOpen: () => {
 
                         },
@@ -36,6 +39,7 @@ function Toast() {
                 else {
                     toastFn(value.message, {
                         toastId: customId,
+                        autoClose: value.config?.autoClose || autoClose,
                         onOpen: () => {
 
                         },
@@ -47,7 +51,7 @@ function Toast() {
                 toastFn.update(customId, {
                     render: value.message, // it can be a Component
                     //type: 
-                    //autoClose: 5000,
+                    autoClose: value.config?.autoClose || autoClose,
                     //className:
                     onClose: onCloseToast
                 })

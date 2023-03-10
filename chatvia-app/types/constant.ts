@@ -11,6 +11,7 @@ const NEXTAUTH_TYPE = {
 
 const ROUTES = {
     LOGIN: '/login',
+    REGISTER: '/register',
     HOME: '/home'
 }
 
