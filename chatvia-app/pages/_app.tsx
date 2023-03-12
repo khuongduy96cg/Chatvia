@@ -1,13 +1,17 @@
-import '@/styles/globals.css';
 import { Provider } from 'react-redux';
 import { SessionProvider, signIn, useSession } from "next-auth/react"
 import type { AppProps, AppType } from 'next/app';
-import { store } from '../redux/store';
-import React from 'react';
-import { WithAuthentication } from '@/interfaces/auth';
+import React, { useEffect, useState } from 'react';
 import { Session } from 'next-auth';
+import { useRouter } from 'next/router';
+
+import { store } from '../redux/store';
 
 import { NEXTAUTH_STATUS } from '@/types/constant'
+import Spinner from '@/components/spinner/Spinner';
+import { WithAuthentication } from '@/interfaces/auth';
+
+import '@/styles/globals.css';
 
 /**
  * Needed to infer requiresAuthentication as a prop of Component
@@ -26,10 +30,37 @@ const App: AppType<{ session: Session | null }> = props => {
   //   ? AuthGuard
   //   : Fragment
 
+  const router = useRouter()
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const start = () => {
+      console.log("loading start")
+      setLoading(true)
+    };
+    const end = () => {
+      console.log("loading finished")
+      setLoading(false)
+    };
+    router.events.on("routeChangeStart", start)
+    router.events.on("routeChangeComplete", end)
+    router.events.on("routeChangeError", end)
+    return () => {
+      router.events.off("routeChangeStart", start)
+      router.events.off("routeChangeComplete", end)
+      router.events.off("routeChangeError", end)
+    };
+  }, [])
+
   return (
     <SessionProvider session={session}>
       <Provider store={store}>
-        {Component.requiresAuthentication ? (<Auth> <Component {...pageProps} /> </Auth>) : (<Component {...pageProps} />)
+        {
+          Component.requiresAuthentication
+          ? (<Auth> <Component {...pageProps} /> </Auth>)
+          : (
+            loading ? (<Spinner />) : (<Component {...pageProps} />)  
+            )
         }
       </Provider>
     </SessionProvider>
@@ -65,8 +96,8 @@ function Auth({ children }: any) {
   if (isUser) {
     return children
   }
-  
+
   // Session is being fetched, or no user.
   // If no user, useEffect() will redirect.
-  return <div>Loading...</div>
+  return <Spinner />
 }

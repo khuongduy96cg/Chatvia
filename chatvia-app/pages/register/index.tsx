@@ -1,18 +1,25 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import Image from 'next/image'
 import { FieldValues, useForm, UseFormReturn } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 
 import Layout from '@/components/layout'
 import { Button } from '@/components/button/Button';
+import { toastEmitter } from '@/redux/slices/toastSlice';
+import { showHideLoading } from '@/redux/slices/spinnerSlice';
+import { useCreateUserMutation } from '@/redux/slices/api/userAPISlice';
 
 import { ROUTES } from '@/types/constant';
+import { User } from '@/interfaces/auth';
+import { ToastState } from '@/interfaces/Itoast';
 
 import styles from '../login/Login.module.css';
 import registerImage from '@/public/login_image.gif';
-import { User } from '@/interfaces/auth';
 
 function Register() {
-
+    const formRef = useRef(null as HTMLFormElement | null)
+    const dispatch = useDispatch()
+    const [ createUser, { isLoading } ] = useCreateUserMutation()
     const {
         register,
         handleSubmit,
@@ -20,15 +27,27 @@ function Register() {
         getValues
     } = useForm() as UseFormReturn;
 
-    const handleError = (errors: any) => { };
+    const handleError = (errors: any) => { }
 
-    const handleSignup = async (data: FieldValues) => {
+    const handleSignup = (data: FieldValues) => {
         try {
-
+            console.log('signup======', data)
+            dispatch(showHideLoading(true))
             const { username, password, email, first_name, last_name } = data as User;
             //handle call api create user
+            createUser({
+                username,
+                password,
+                email,
+                first_name,
+                last_name
+            }).then((res) => {
+                dispatch(showHideLoading(isLoading))
+                console.log('createuser====response======', res)
+            })
 
         } catch (err: any) {
+            dispatch(showHideLoading(isLoading))
             // dispatch(toastEmitter({
             //     isShow: true,
             //     isError: true,
@@ -37,9 +56,25 @@ function Register() {
         }
     }
 
+    const handleBtnRegister = () => {
+        try {
+            const form = formRef?.current;
+            const submitButton = form?.querySelector('button[type="submit"]') as HTMLElement
+            submitButton?.click();
+        }
+        catch (err) {
+            dispatch(toastEmitter({
+                isShow: true,
+                isError: true,
+                message: err || ''
+            } as ToastState))
+        }
+    }
+
     const validatePassword = () => {
-        const { password, confirmPassword } = getValues() // Get the values of the two password fields
-        return password === confirmPassword || "Passwords do not match"
+        const { password, confirm_password } = getValues() // Get the values of the two password fields
+        //console.log('passsword====', password, confirm_password)
+        return password === confirm_password || "Passwords do not match"
     }
 
     const signUpOptions = {
@@ -76,10 +111,20 @@ function Register() {
                         alt=""
                         className={styles._image}>
                     </Image>
+                    <Button type="submit"
+                        callbackfunc={handleBtnRegister} >
+                        Sign up
+                    </Button>
+
+                    <div className={styles.footer}>
+                        <a href={ROUTES.LOGIN}>Sign in</a>
+                    </div>
                 </section>
                 <section className={`${styles.form_wrapper} grid center`}>
-                    <form action="" className={styles.form_section}
+                    <form action="" className={styles.form_section} ref={formRef}
                         onSubmit={handleSubmit(handleSignup, handleError)}>
+
+                        <button type="submit" style={{ display: 'none' }}>Submit</button>
 
                         <div className={styles.header}>
                             <h1>Register form</h1>
@@ -131,16 +176,6 @@ function Register() {
                                 {...register("confirm_password", signUpOptions.confirm_password)} />
 
                             {errors?.confirm_password && (<p className={styles.validate_error}>{errors.confirm_password.message as React.ReactNode}</p>)}
-                        </div>
-
-                        <Button type="submit"
-                        //callbackfunc={handleButtonLoginClick}
-                        >
-                            Sign up
-                        </Button>
-
-                        <div className={styles.footer}>
-                            <a href={ROUTES.LOGIN}>Sign in</a>
                         </div>
                     </form>
                 </section>

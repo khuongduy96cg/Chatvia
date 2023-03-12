@@ -1,6 +1,8 @@
 import { configureStore, getDefaultMiddleware , ThunkAction, Action } from '@reduxjs/toolkit';
 import counterReducer from '@/redux/slices/counterSlice';
 import toastReducer from '@/redux/slices/toastSlice';
+import spinnerReducer from '@/redux/slices/spinnerSlice';
+import { api as userAPI } from '@/redux/slices/api/userAPISlice';
 
 // const middleware = [...getDefaultMiddleware(), authMiddleware];
 
@@ -8,9 +10,11 @@ export const store = configureStore({
   reducer: {
     //auth: authSlice,
     counter: counterReducer,
-    toast: toastReducer
+    toast: toastReducer,
+    spinner: spinnerReducer,
+    [userAPI.reducerPath]: userAPI.reducer,
   },
-  //middleware
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(userAPI.middleware),
 });
 
 export type AppDispatch = typeof store.dispatch;

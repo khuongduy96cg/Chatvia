@@ -8,9 +8,11 @@ import { useRouter } from 'next/router';
 import { Props, User } from '@/interfaces/auth';
 
 import { toastEmitter } from '@/redux/slices/toastSlice';
+import { showHideLoading } from '@/redux/slices/spinnerSlice';
 
 import Layout from '@/components/layout';
 import { Button } from '@/components/button/Button';
+import Spinner from '@/components/spinner/Spinner';
 
 import { NEXTAUTH_STATUS, NEXTAUTH_TYPE, ROUTES } from '@/types/constant';
 
@@ -22,8 +24,6 @@ const Login = ({ csrfToken }: Props) => {
     const { status, data: session } = useSession();
     const router = useRouter();
     const dispatch = useDispatch();
-
-    //console.log('login session========', session);
 
     useEffect(() => {
         if (status === NEXTAUTH_STATUS.AUTHENTICATED) {
@@ -38,7 +38,7 @@ const Login = ({ csrfToken }: Props) => {
     } = useForm() as UseFormReturn;
 
     if (status === NEXTAUTH_STATUS.LOADING) {
-        return (<div>Loading...</div>)
+        return (<Spinner />)
     }
     else if (status === NEXTAUTH_STATUS.UNAUTHENTICATED) {
 
@@ -62,6 +62,7 @@ const Login = ({ csrfToken }: Props) => {
 
         const handleSignin = async (data: FieldValues) => {
             try {
+                dispatch(showHideLoading(true))
 
                 const { username, password } = data as User;
 
@@ -70,6 +71,8 @@ const Login = ({ csrfToken }: Props) => {
                     username,
                     password
                 })
+
+                dispatch(showHideLoading(false))
 
                 if (result?.ok && !result.error) {
                     router.push(ROUTES.HOME);
@@ -82,6 +85,7 @@ const Login = ({ csrfToken }: Props) => {
                     }))
                 }
             } catch (err: any) {
+                dispatch(showHideLoading(false))
                 dispatch(toastEmitter({
                     isShow: true,
                     isError: true,

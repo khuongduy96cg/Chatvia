@@ -1,5 +1,6 @@
 import Head from 'next/head'
 import React, { ReactNode } from 'react';
+import Spinner from './spinner/Spinner';
 import Toast from './Toast/Toast';
 
 // import Header from "../components/header";
@@ -20,6 +21,7 @@ export default function Layout({ children }: LayoutProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Toast />
+      <Spinner />
       {children}
       {/* <Footer /> */}
     </>
