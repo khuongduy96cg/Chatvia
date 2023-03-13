@@ -10,7 +10,7 @@ import { ToastState } from '@/interfaces/Itoast'
 
 const customId = 'toast-id'
 //toast.dismiss();
-const autoClose = 5000;
+const autoClose = 500;
 
 function Toast() {
     const value = useSelector((state: RootState) => state.toast.value as ToastState)

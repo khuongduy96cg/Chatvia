@@ -1,19 +1,20 @@
 import { User } from '@/interfaces/auth'
+import { ROUTES } from '@/types/constant'
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 //https://codesandbox.io/s/github/reduxjs/redux-toolkit/tree/master/examples/query/react/optimistic-update?from-embed=&file=/src/app/services/posts.ts:1433-1447
 type UsersResponse = User[]
 
 export const api = createApi({
-    baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
+    baseQuery: fetchBaseQuery({ baseUrl: `${ROUTES.API}` }),
     tagTypes: ['User'],
     endpoints: (build) => ({
         getUser: build.query<User, string>({
-            query: (_id) => `users/${_id}`,
+            query: (_id) => `${ROUTES.USERS_API}/${_id}`,
             providesTags: (result, error, _id) => [{ type: 'User', _id }]
         }),
         getPosts: build.query<UsersResponse, void>({
-            query: () => 'users',
+            query: () => `${ROUTES.USERS_API}`,
             providesTags: (result) =>
                 result
                     ? [
@@ -24,7 +25,7 @@ export const api = createApi({
         }),
         createUser: build.mutation<User, Partial<User>>({
             query: (body) => ({
-                url: `users/create-user`,
+                url: `${ROUTES.USERS_API}${ROUTES.CREATE_USER_API}`,
                 method: 'POST',
                 body,
             }),
@@ -32,7 +33,7 @@ export const api = createApi({
         }),
         updateUser: build.mutation<void, Pick<User, '_id'> & Partial<User>>({
             query: ({ _id, ...patch }) => ({
-                url: `users/${_id}`,
+                url: `${ROUTES.USERS_API}/${_id}`,
                 method: 'PUT',
                 body: patch,
             }),
@@ -53,7 +54,7 @@ export const api = createApi({
         deleteUser: build.mutation<{ success: boolean; _id: string }, string>({
             query(_id) {
                 return {
-                    url: `users/${_id}`,
+                    url: `${ROUTES.USERS_API}/${_id}`,
                     method: 'DELETE',
                 }
             },

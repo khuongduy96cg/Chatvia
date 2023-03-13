@@ -4,29 +4,28 @@ import { Schema, model, models } from "mongoose";
 const userSchema = new Schema({
   _id: {
     type: String,
-    required:true
+    required: true
   },
-  username:{
+  username: {
     type: String,
-    required:true
+    required: true
   },
-  password:{
+  password: {
     type: String,
-    required:true
+    required: true
   },
   email: {
     type: String,
-    required:true
+    required: true
   },
-  name: {
-        first_name: {
-            type: String,
-            required: false
-        },
-        last_name: {
-          type: String
-        }
-    }
+  first_name: {
+    type: String,
+    //required: false
+  },
+  last_name: {
+    type: String,
+    //required: false
+  }
 });
 
 // the schema is useless so far

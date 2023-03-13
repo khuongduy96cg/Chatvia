@@ -12,6 +12,7 @@ import { useCreateUserMutation } from '@/redux/slices/api/userAPISlice';
 import { ROUTES } from '@/types/constant';
 import { User } from '@/interfaces/auth';
 import { ToastState } from '@/interfaces/Itoast';
+import { ResponseAPI } from '@/interfaces/response';
 
 import styles from '../login/Login.module.css';
 import registerImage from '@/public/login_image.gif';
@@ -41,18 +42,33 @@ function Register() {
                 email,
                 first_name,
                 last_name
-            }).then((res) => {
+            }).then((res: any) => {
                 dispatch(showHideLoading(isLoading))
                 console.log('createuser====response======', res)
+                const response = res.data as ResponseAPI
+                if(response.Code == 1){
+                    dispatch(toastEmitter({
+                        isShow: true,
+                        isError: false,
+                        message: response.Message || 'Error'
+                    }))
+                }
+                else {
+                    dispatch(toastEmitter({
+                        isShow: true,
+                        isError: true,
+                        message: response.Message || 'Error'
+                    }))
+                }
             })
 
         } catch (err: any) {
             dispatch(showHideLoading(isLoading))
-            // dispatch(toastEmitter({
-            //     isShow: true,
-            //     isError: true,
-            //     message: err || ''
-            // }))
+            dispatch(toastEmitter({
+                isShow: true,
+                isError: true,
+                message: err || ''
+            }))
         }
     }
 

@@ -37,8 +37,8 @@ const authOptions: NextAuthOptions = {
                     
                     const user = await UserModel.findOne({ username: credentials?.username }) as User;
 
-                    //bcrypt.compareSync(credentials?.password as string, user.password)
-                    if (user && credentials?.password === user.password) {
+                    //
+                    if (user && bcrypt.compareSync(credentials?.password as string, user.password)) {
                         // Any object returned will be saved in `user` property of the JWT
                         console.log("user-----", user);
                         //return user;

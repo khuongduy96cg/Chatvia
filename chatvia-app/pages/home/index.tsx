@@ -1,13 +1,21 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { NextPage } from 'next'
+// * Socket.io
+//import SocketIOClient from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import { useAddMessageMutation } from '@/redux/slices/api/messageAPISlice';
 
 import styles from './home.module.css'
+
 import Message from '@/components/message/message'
 import ChatMessage from '@/components/chat-message/chat-message'
 import ChatFooter from '@/components/chat-footer/chat-footer'
 import ChatDetail from '@/components/chat-detail/chat-detail'
+
 import { WithAuthentication } from '@/interfaces/auth'
+import { Message as IMessage } from '@/interfaces/chat'
+import { ROUTES, SOCKET_IO_API } from '@/types/constant';
 // import authOptions from '@/pages/api/auth/[...nextauth]'
 
 // interface Props {
@@ -15,6 +23,71 @@ import { WithAuthentication } from '@/interfaces/auth'
 // }
 
 const Home: WithAuthentication<NextPage> = () => {
+  const [ addMessage, { isLoading } ] = useAddMessageMutation()
+  const [sendMessage, setSendMessage] = useState<string>("");
+  const [connected, setConnected] = useState<boolean>(false);
+  const [chat, setChat] = useState<IMessage[]>([]);
+
+  const username = 'Test'
+
+  useEffect((): any => {
+    // connect to socket server
+    const socket: Socket = io(ROUTES.API, {
+      path: SOCKET_IO_API.SOCKET_IO,
+    });
+
+    // log socket connection
+    socket.on("connect", () => {
+      console.log("SOCKET CONNECTED!", socket.id);
+      setConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server!");
+    });
+
+    // update chat on new message dispatched
+    socket.on("message", (message: IMessage) => {
+      chat.push(message);
+      setChat([...chat]);
+    });
+
+    // socket disconnect on component unmount if exists
+    if (socket) return () => socket.disconnect();
+  }, []);
+
+  const sendMessageHandler = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSendMessage(event.target.value);
+    },
+    [sendMessage]
+  );
+
+  const enterKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      // send message
+      event.preventDefault();
+      submitSendMessage(event);
+    }
+  };
+
+  const submitSendMessage = async (
+    event: React.FormEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+    if (sendMessage) {
+      const message: IMessage = {
+        _id: '',
+        user_id_from: username,
+        user_id_to: username,
+        content: sendMessage,
+      };
+
+      const response = addMessage(message)
+      //const response = await axios.post("/api/chat", message);
+      setSendMessage("");
+    }
+  };
 
   return (
     <div className={styles.app}>

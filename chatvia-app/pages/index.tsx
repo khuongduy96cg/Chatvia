@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import { NEXTAUTH_STATUS, ROUTES } from '@/types/constant'
+import Spinner from "@/components/spinner/Spinner";
 
 export default function Index() {
 
@@ -19,7 +20,7 @@ export default function Index() {
   }, [status]);
 
   if (status === NEXTAUTH_STATUS.LOADING) {
-    return (<div>Loading...</div>)
+    return (<Spinner />)
   }
   else if (status === NEXTAUTH_STATUS.UNAUTHENTICATED) {
     return (
